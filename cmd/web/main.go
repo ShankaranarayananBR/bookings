@@ -18,17 +18,17 @@ func main() {
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
 	session.Cookie.Secure = false
-	//m := pat.New()
-	//m.Get("/", http.HandlerFunc(handler.Repo.Home))
-	//m.Get("/about", http.HandlerFunc(handler.Repo.About))
-	//http.Handle("/", m)
-	//http.Handle("/about", m)
 
+	//Using Chi Router and using a standard middleware of Chi router
 	m := chi.NewRouter()
 	m.Use(middleware.Recoverer)
 	m.Use(noserve)
 	m.Get("/", handler.Repo.Home)
 	m.Get("/about", handler.Repo.About)
+
+	//FileServer is used to read resources for the static pages
+	fileServer := http.FileServer(http.Dir("./static/"))
+	m.Handle("/static/*", http.StripPrefix("/static", fileServer))
 	http.Handle("/", m)
 	http.Handle("/about", m)
 	err := http.ListenAndServe(":8080", nil)
