@@ -1,39 +1,58 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
+	"github.com/ShankaranarayananBR/bookings/pkg/config"
 	handler "github.com/ShankaranarayananBR/bookings/pkg/handlers"
-
+	"github.com/ShankaranarayananBR/bookings/pkg/render"
 	"github.com/alexedwards/scs/v2"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 )
 
+const portNumber = ":8080"
+
+var app config.AppConfig
+var session *scs.SessionManager
+
+// main is the main function
 func main() {
-	session := scs.New()
+	// change this to true when in production
+	app.InProduction = false
+
+	// set up the session
+	session = scs.New()
 	session.Lifetime = 24 * time.Hour
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
-	session.Cookie.Secure = false
+	session.Cookie.Secure = app.InProduction
 
-	//Using Chi Router and using a standard middleware of Chi router
-	m := chi.NewRouter()
-	m.Use(middleware.Recoverer)
-	m.Use(noserve)
-	m.Get("/", handler.Repo.Home)
-	m.Get("/about", handler.Repo.About)
+	app.Session = session
 
-	//FileServer is used to read resources for the static pages
-	fileServer := http.FileServer(http.Dir("./static/"))
-	m.Handle("/static/*", http.StripPrefix("/static", fileServer))
-	http.Handle("/", m)
-	http.Handle("/about", m)
-	err := http.ListenAndServe(":8080", nil)
+	tc, err := render.CreateTemplateCache()
 	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+		log.Fatal("cannot create template cache")
 	}
 
+	app.TemplateCache = tc
+	app.UseCache = false
+
+	repo := handler.NewRepo(&app)
+	handler.NewHandlers(repo)
+
+	render.NewTemplates(&app)
+
+	fmt.Println(fmt.Sprintf("Staring application on port %s", portNumber))
+
+	srv := &http.Server{
+		Addr:    portNumber,
+		Handler: routes(&app),
+	}
+
+	err = srv.ListenAndServe()
+	if err != nil {
+		log.Fatal(err)
+	}
 }

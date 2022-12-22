@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/ShankaranarayananBR/bookings/pkg/config"
+	"github.com/ShankaranarayananBR/bookings/pkg/models"
 	"github.com/ShankaranarayananBR/bookings/pkg/render"
 )
 
@@ -26,15 +27,34 @@ func NewHandlers(r *Repository) {
 }
 
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "home.page.tmpl")
+	render.RenderTemplate(w, r, "home.page.tmpl", &models.TemplateData{})
 }
 
 // About is the handler for the about page
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
-	// perform some logic
-	stringMap := make(map[string]string)
-	stringMap["test"] = "Hello, again"
+	render.RenderTemplate(w, r, "about.page.tmpl", &models.TemplateData{})
+}
 
-	// send data to the template
-	render.RenderTemplate(w, "about.page.tmpl")
+func (m *Repository) Generals(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, r, "generals.page.tmpl", &models.TemplateData{})
+}
+
+func (m *Repository) Majors(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, r, "majors.page.tmpl", &models.TemplateData{})
+}
+
+func (m *Repository) Availablity(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, r, "search-availablity.page.tmpl", &models.TemplateData{})
+}
+
+func (m *Repository) Contact(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, r, "contact.page.tmpl", &models.TemplateData{})
+}
+
+func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, r, "make-reservation.page.tmpl", &models.TemplateData{})
+}
+
+func (m *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Posted to search availability"))
 }
