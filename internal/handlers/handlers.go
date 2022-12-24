@@ -1,12 +1,14 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
-	"github.com/ShankaranarayananBR/bookings/pkg/config"
-	"github.com/ShankaranarayananBR/bookings/pkg/models"
-	"github.com/ShankaranarayananBR/bookings/pkg/render"
+	"github.com/ShankaranarayananBR/bookings/internal/config"
+	"github.com/ShankaranarayananBR/bookings/internal/models"
+	"github.com/ShankaranarayananBR/bookings/internal/render"
 )
 
 // Repo the repository used by the handlers
@@ -54,6 +56,26 @@ func (m *Repository) Contact(w http.ResponseWriter, r *http.Request) {
 
 func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 	render.RenderTemplate(w, r, "make-reservation.page.tmpl", &models.TemplateData{})
+}
+
+type jsonResponse struct {
+	OK      bool   `json:"ok"`
+	Message string `json:"message"`
+}
+
+func (m *Repository) AvailabilityJson(w http.ResponseWriter, r *http.Request) {
+	resp := jsonResponse{
+		OK:      false,
+		Message: "Available",
+	}
+
+	out, err := json.MarshalIndent(resp, "", "    ")
+	if err != nil {
+		log.Println(err)
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	w.Write(out)
 }
 
 func (m *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
