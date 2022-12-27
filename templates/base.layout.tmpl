@@ -125,6 +125,9 @@
         })
     }
 
+
+
+
     function notifyModal(title, text, icon, confirmationButtonText) {
         Swal.fire({
             title: title,
@@ -133,6 +136,18 @@
             confirmButtonText: confirmationButtonText
         })
     }
+
+    {{with .Error}}
+    notify("{{.}}","error")
+    {{end}}
+
+    {{with .Flash}}
+    notify("{{.}}","flash")
+    {{end}}
+
+    {{with .Warning}}
+    notify("{{.}}","warning")
+    {{end}}
 
     function Prompt() {
         let toast = function (c) {
